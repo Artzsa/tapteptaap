@@ -1,0 +1,298 @@
+﻿CardLink
+NFC Digital Identity Card Platform
+Product Requirements Document  â€¢  v1.0  â€¢  Mei 2026
+
+Status
+Draft â€” In Review
+
+Author
+Product Team
+
+Stakeholders
+Engineering, Design, Business
+
+Target Launch
+Q3 2026
+
+Versi Dokumen
+1.0.0
+
+1. Executive Summary
+CardLink adalah platform digital identity card berbasis NFC yang memungkinkan pengguna memiliki halaman profil interaktif â€” lengkap dengan animasi QR code rotating, link sosial media, dan URL unik â€” yang dapat diakses hanya dengan menempelkan NFC card ke smartphone.
+
+Analogikan sebagai Linktree yang bisa 'ditap' secara fisik. Pengguna cukup program satu NFC card sekali, lalu siapapun yang tap card tersebut langsung diarahkan ke halaman profil digital mereka secara real-time.
+
+2. Problem Statement
+2.1 Konteks
+Di era networking digital, bertukar kontak masih sering dilakukan secara manual â€” tukar nomor HP, scan QR satu per satu, atau cari profil sosmed manual. Proses ini lambat, mudah terlupakan, dan tidak berkesan.
+
+2.2 Pain Points
+Kartu nama fisik mudah hilang dan tidak bisa diupdate
+QR code statis tidak fleksibel jika link berubah
+Linktree tidak memiliki integrasi hardware (NFC/fisik)
+Tidak ada satu platform yang menggabungkan profil digital + NFC + animasi interaktif
+
+3. Goals & Success Metrics
+3.1 Tujuan Produk
+Membuat digital identity yang bisa dibagikan via NFC tap, QR scan, atau link langsung
+Memberikan pengalaman yang memorable dan berkesan saat networking
+Memungkinkan pengguna update profil kapan saja tanpa perlu ganti NFC card
+
+3.2 Success Metrics
+
+Fitur
+Prioritas
+Estimasi
+Catatan
+Registered users
+P0
+Month 3
+Target: 1.000 pengguna
+Profile page views
+P0
+Ongoing
+Target: 10.000 views/bulan
+NFC tap-to-open rate
+P1
+Month 2
+Target: > 70% success rate
+Profile completion rate
+P1
+Month 1
+Target: > 60% isi semua field
+Link click-through rate
+P2
+Ongoing
+Target: > 30% per visit
+
+4. User Personas
+4.1 Primary User â€” The Networker
+
+Profil
+â€¢ Profesional muda usia 22â€“35 tahun
+â€¢ Aktif di LinkedIn, Instagram, X, dan Threads
+â€¢ Sering hadir di event networking, konferensi, atau meetup
+â€¢ Melek teknologi, early adopter
+
+Kebutuhan
+â€¢ Cara berbagi profil yang cepat dan tidak awkward
+â€¢ Semua sosmed dalam satu tempat
+â€¢ Tampilan yang keren dan berkesan
+
+4.2 Secondary User â€” The Creator
+
+Profil
+â€¢ Content creator, freelancer, atau influencer
+â€¢ Ingin satu link yang bisa dishare di bio / caption
+â€¢ Perlu analytics siapa yang mengunjungi profil mereka
+
+Kebutuhan
+â€¢ Halaman profil yang customizable dan estetik
+â€¢ Bisa diupdate konten kapan saja tanpa ganti URL
+â€¢ Link analytics dasar (berapa klik, dari mana)
+
+5. Features & Requirements
+5.1 Feature List & Prioritas
+
+Fitur
+Prioritas
+Estimasi
+Catatan
+Halaman profil publik (/u/username)
+P0
+2 minggu
+Core product
+Animasi QR rotating per platform
+P0
+1 minggu
+Key differentiator
+Link sosmed (IG, X, LinkedIn, Threads)
+P0
+1 minggu
+MVP requirement
+URL unik per user (NFC target)
+P0
+3 hari
+Wajib untuk NFC
+Form edit profil (nama, bio, lokasi, tags)
+P0
+1 minggu
+Self-serve
+Registrasi & login
+P0
+1 minggu
+Auth dasar
+QR code statis untuk profil
+P1
+3 hari
+Download & share
+Analytics kunjungan dasar
+P1
+1 minggu
+Nilai tambah
+Custom warna tema kartu
+P1
+1 minggu
+Personalisasi
+Upload foto profil
+P1
+3 hari
+Trust signal
+Custom domain
+P2
+2 minggu
+Premium feature
+Dashboard admin
+P2
+2 minggu
+Ops tool
+Integrasi vCard / kontak HP
+P2
+1 minggu
+Nice to have
+
+6. User Flows
+6.1 Onboarding Flow
+Pengguna baru mendaftar â†’ mengisi profil dasar (nama, bio, lokasi, tags) â†’ tambah link sosmed â†’ sistem generate URL unik â†’ pengguna diarahkan ke halaman profil mereka yang sudah live.
+
+6.2 NFC Setup Flow
+Pengguna copy URL profil (format: cardlink.id/username) â†’ buka app NFC Tools di HP â†’ tulis URL ke NFC card â†’ selesai. Proses ini satu kali saja. Setelah itu, perubahan profil langsung live tanpa perlu reprogram card.
+
+6.3 Visitor Flow (penerima tap)
+Seseorang tap NFC card milik pengguna â†’ browser HP langsung terbuka ke halaman profil â†’ visitor melihat profil dengan animasi QR rotating â†’ tap ikon platform yang diinginkan â†’ diarahkan ke sosmed yang dipilih.
+
+7. Technical Requirements
+7.1 Tech Stack
+Frontend: React + Tailwind CSS â€” SPA dengan routing per username
+Backend: Node.js + Express â€” REST API untuk CRUD profil
+Database: SQLite (MVP) â†’ PostgreSQL (production)
+Auth: JWT + bcrypt â€” session-based login
+Storage: Local (MVP) â†’ Cloudflare R2 untuk foto profil
+Hosting: Vercel (frontend) + Railway / Fly.io (backend)
+NFC: Standar NDEF URL record â€” kompatibel semua NFC card tipe 2/4
+
+7.2 Endpoint API Utama
+
+Fitur
+Prioritas
+Estimasi
+Catatan
+POST /auth/register
+P0
+Sprint 1
+Daftar akun baru
+POST /auth/login
+P0
+Sprint 1
+Login & dapat JWT
+GET /u/:username
+P0
+Sprint 1
+Halaman profil publik
+PUT /profile
+P0
+Sprint 1
+Update profil (auth required)
+POST /profile/links
+P0
+Sprint 1
+Tambah/edit link sosmed
+GET /analytics/:username
+P1
+Sprint 2
+Data kunjungan
+POST /profile/avatar
+P1
+Sprint 2
+Upload foto profil
+
+7.3 Non-Functional Requirements
+Performance: Halaman profil load < 2 detik (mobile, 4G)
+Availability: Uptime 99.5% â€” profil harus selalu bisa diakses
+SEO: Halaman profil publik harus crawlable (Open Graph tags)
+Security: Rate limiting pada endpoint publik, sanitasi input
+Responsive: Mobile-first â€” mayoritas akses dari tap NFC via HP
+
+8. NFC Card Integration
+8.1 Cara Kerja
+CardLink tidak memerlukan hardware khusus atau SDK NFC proprietary. NFC card yang digunakan adalah NFC card standar (NTAG213/215/216) yang tersedia di pasaran seharga Rp 5.000â€“20.000/card. Pengguna menulis URL profil ke card menggunakan app gratis seperti NFC Tools (Android/iOS).
+
+8.2 Kompatibilitas
+Semua smartphone Android dengan NFC (Android 4.0+)
+iPhone 7 dan ke atas (iOS 13+ untuk background NFC reading)
+NFC card tipe: NTAG213, NTAG215, NTAG216, Mifare Ultralight
+
+8.3 Panduan Setup untuk Pengguna
+Step 1: Buka halaman profil â†’ copy URL (cardlink.id/username)
+Step 2: Download NFC Tools dari App Store / Play Store (gratis)
+Step 3: Buka NFC Tools â†’ Write â†’ Add a record â†’ URL â†’ paste URL
+Step 4: Tap NFC card ke bagian belakang HP â†’ Done
+Step 5: Test dengan tap card ke HP lain
+
+9. Design Principles
+Mobile-first: Mayoritas pengunjung profil datang dari tap NFC di HP
+First impression matters: Animasi QR rotating harus smooth (60fps) dan menarik
+Minimal friction: Edit profil < 2 menit, setup NFC < 5 menit
+Accessible: Contrast ratio WCAG AA, tap target minimum 44px
+Dark mode ready: Kartu digital terlihat keren di semua kondisi layar
+
+10. Roadmap
+Sprint 1 â€” MVP (Minggu 1â€“2)
+Auth (register, login, JWT)
+Halaman profil publik dengan animasi QR rotating
+Form edit profil (nama, bio, lokasi, tags, link sosmed)
+URL unik per user â€” NFC-ready
+
+Sprint 2 â€” Enhanced (Minggu 3â€“4)
+Upload foto profil
+QR code statis yang bisa didownload
+Analytics kunjungan dasar (views, link clicks)
+Custom warna tema kartu
+
+Sprint 3 â€” Growth (Bulan 2)
+Admin dashboard
+Custom domain untuk pengguna premium
+Integrasi vCard / simpan kontak langsung ke HP
+SEO optimization & Open Graph
+
+11. Risks & Mitigations
+
+Risiko
+Dampak
+Mitigasi
+iPhone tidak support NFC background di iOS lama
+Medium
+Dokumentasi jelas + fallback QR code
+URL slug conflict antar username
+High
+Validasi unik saat register, suggest alternatif
+Profil diakses saat server down
+High
+CDN caching untuk profil statik
+Spam / fake account
+Medium
+Rate limiting, email verification
+NFC card rusak atau hilang
+Low
+URL tetap sama, user cukup beli card baru
+
+12. Open Questions
+Apakah kita akan jual NFC card fisik secara bundling dengan akun, atau pengguna beli sendiri?
+Monetization model: freemium (basic gratis, premium untuk custom domain + analytics)?
+Nama domain final â€” cardlink.id sudah cek availability?
+Apakah perlu fitur team/organization (satu NFC card untuk tim)?
+Bagaimana handle pengguna yang lupa username mereka?
+
+13. Appendix
+Referensi
+Video inspirasi: @danial_alias di Threads (digital card animation)
+Linktree â€” https://linktr.ee (benchmark produk)
+NFC Tools app â€” https://www.wakdev.com/en/apps/nfc-tools.html
+NTAG213 datasheet â€” NXP Semiconductors
+
+Changelog
+
+v1.0 â€” Mei 2026
+Dokumen pertama dibuat berdasarkan sesi brainstorming dan demo interaktif
+
+â€” End of Document â€”

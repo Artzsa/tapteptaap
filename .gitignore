@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.sqlite
+uploads/*
+!uploads/.gitkeep
+temp_prd/
+scratch/
