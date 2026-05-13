@@ -54,7 +54,17 @@ app.use('/api', require('./routes/analytics'));
 app.use('/api', require('./routes/settings'));
 app.use('/api', require('./routes/integrations'));
 
-// ─── 404 Handler ──────────────────────────────────────────────────────────
+// ─── Serve Frontend Build (Production) ────────────────────────────────────
+const frontendDist = path.join(__dirname, '../client/dist');
+app.use(express.static(frontendDist));
+
+// Catch-all: kirim index.html untuk semua route non-API (biar React Router handle)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
+// ─── 404 Handler (hanya untuk API routes) ─────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
