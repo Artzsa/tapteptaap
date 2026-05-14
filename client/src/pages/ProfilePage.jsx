@@ -15,7 +15,7 @@ import {
   Moon,
   MapPin
 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import QRCodeStyling from 'qr-code-styling';
 import { useTheme } from '../context/ThemeContext';
 import api from '../api';
 
@@ -311,25 +311,43 @@ const ParticleDissolveQR = ({ value, themeHex, onComplete }) => {
     }
   }, [triggerDissolve, triggerAssemble]);
 
-  return (
-    <div className="relative w-20 h-20 flex items-center justify-center">
-      <canvas 
-        ref={canvasRef}
-        width={80}
-        height={80}
-        className="absolute inset-0 w-full h-full"
-      />
-      {showQR && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <QRCodeSVG 
-            value={value}
-            size={80}
-            level="H"
-          />
-        </div>
-      )}
-    </div>
-  );
+const CustomQRCode = ({ value, themeHex }) => {
+  const ref = useRef(null);
+  const qrCodeRef = useRef(null);
+
+  useEffect(() => {
+    qrCodeRef.current = new QRCodeStyling({
+      width: 120,
+      height: 120,
+      type: 'svg',
+      data: value,
+      dotsOptions: {
+        color: themeHex || '#2563eb',
+        type: 'dots' // Truly circular look
+      },
+      backgroundOptions: {
+        color: 'transparent',
+      },
+      cornersSquareOptions: {
+        color: themeHex || '#2563eb',
+        type: 'extra-rounded'
+      },
+      cornersDotOptions: {
+        color: themeHex || '#2563eb',
+        type: 'dot'
+      }
+    });
+
+    if (ref.current) {
+      qrCodeRef.current.append(ref.current);
+    }
+
+    return () => {
+      if (ref.current) ref.current.innerHTML = '';
+    };
+  }, [value, themeHex]);
+
+  return <div ref={ref} className="flex items-center justify-center" />;
 };
 
 const ProfilePage = () => {
@@ -589,30 +607,9 @@ END:VCARD`;
 
             {/* Central Node with Particle Dissolve QR */}
             <div className="relative z-20 w-36 h-36 rounded-full bg-white shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col items-center justify-center group overflow-hidden border-8 border-white/10">
-                {/* Circular Clipped QR */}
-                <div className="relative w-24 h-24 flex items-center justify-center rounded-full overflow-hidden bg-white">
-                  <canvas 
-                    ref={el => {
-                      if (el && !particleRef.current) {
-                        particleRef.current = el;
-                        window.__particleQR = window.__particleQR || {};
-                      }
-                    }}
-                    width={96}
-                    height={96}
-                    className="absolute inset-0 w-full h-full"
-                  />
-                  {showNewQR && (
-                    <div className="absolute inset-0 flex items-center justify-center scale-110">
-                      <QRCodeSVG 
-                        value={activeSocial?.url || window.location.href}
-                        size={96}
-                        level="H"
-                        includeMargin={false}
-                        fgColor="#2563eb"
-                      />
-                    </div>
-                  )}
+                {/* Truly Circular QR using qr-code-styling */}
+                <div className="relative w-30 h-30 flex items-center justify-center scale-110">
+                   <CustomQRCode value={activeSocial?.url || window.location.href} themeHex="#2563eb" />
                 </div>
             </div>
 
