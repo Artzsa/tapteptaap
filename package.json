@@ -2,11 +2,20 @@
   "name": "vibetape-root",
   "version": "1.0.0",
   "scripts": {
+    "start": "cd server && node index.js",
     "client": "cd client && npm run dev",
     "server": "cd server && node --watch index.js",
-    "dev": "npx concurrently \"npm run server\" \"npm run client\""
+    "dev": "npx concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm install && npm run build"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "bcrypt": "^6.0.0",
+    "concurrently": "^8.2.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^6.0.1"
   }
 }
