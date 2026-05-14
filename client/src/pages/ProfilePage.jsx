@@ -123,18 +123,18 @@ const CustomQRCode = ({ value, themeHex }) => {
       data: value,
       dotsOptions: {
         color: themeHex || '#2563eb',
-        type: 'square' // Reverted to square for better scannability
+        type: 'rounded' // Rounded blocks are much more scannable than dots
       },
       backgroundOptions: {
         color: 'transparent',
       },
       cornersSquareOptions: {
         color: themeHex || '#2563eb',
-        type: 'square'
+        type: 'extra-rounded' // Circular look for the 3 eyes
       },
       cornersDotOptions: {
         color: themeHex || '#2563eb',
-        type: 'square'
+        type: 'dot'
       }
     });
 
