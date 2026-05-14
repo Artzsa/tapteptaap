@@ -5,5 +5,5 @@ uploads/*
 !uploads/.gitkeep
 temp_prd/
 scratch/
-client/dist
+# client/dist (dihapus agar bisa dideploy via Git ke Hostinger)
 vibetape-deploy.zip

@@ -13,7 +13,7 @@ echo "=========================="
 
 # --- Konfigurasi ---
 # Ganti dengan path domain kamu di Hostinger
-DEPLOY_PATH=~/domains/yourdomain.com/public_html
+DEPLOY_PATH=~domains/mediumturquoise-gazelle-966383.hostingersite.com/
 
 # --- 1. Build Frontend ---
 echo ""
@@ -38,7 +38,7 @@ if [ ! -f server/.env ]; then
 PORT=5000
 JWT_SECRET=change-this-to-a-random-string
 NODE_ENV=production
-CORS_ORIGINS=https://yourdomain.com
+CORS_ORIGINS=https://mediumturquoise-gazelle-966383.hostingersite.com
 EOF
   echo "   🔴 IMPORTANT: Edit server/.env and set JWT_SECRET to a random value!"
   echo "   🔴 IMPORTANT: Set CORS_ORIGINS to your actual domain!"
