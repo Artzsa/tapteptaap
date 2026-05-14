@@ -13,6 +13,7 @@ import {
   Video,
   Sun,
   Moon,
+  MapPin
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useTheme } from '../context/ThemeContext';
@@ -541,10 +542,12 @@ END:VCARD`;
                     <Cpu size={10} />
                     Core ID: {user?.username}
                 </div>
-                <div className="flex items-center gap-1 text-[9px] font-black text-green-400 bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20 uppercase tracking-[0.2em]">
-                    <Wifi size={10} className="animate-pulse" />
-                    Online
-                </div>
+                {user?.location && (
+                  <div className="flex items-center gap-1 text-[9px] font-black text-white/50 px-2 py-1 uppercase tracking-[0.2em]">
+                      <MapPin size={10} />
+                      {user.location}
+                  </div>
+                )}
             </div>
 
             {/* Save Contact Button */}
@@ -586,8 +589,8 @@ END:VCARD`;
 
             {/* Central Node with Particle Dissolve QR */}
             <div className="relative z-20 w-36 h-36 rounded-full bg-white shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col items-center justify-center group overflow-hidden border-8 border-white/10">
-                {/* Particle Dissolve QR */}
-                <div className="relative w-24 h-24 flex items-center justify-center">
+                {/* Circular Clipped QR */}
+                <div className="relative w-24 h-24 flex items-center justify-center rounded-full overflow-hidden bg-white">
                   <canvas 
                     ref={el => {
                       if (el && !particleRef.current) {
@@ -600,10 +603,10 @@ END:VCARD`;
                     className="absolute inset-0 w-full h-full"
                   />
                   {showNewQR && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center scale-110">
                       <QRCodeSVG 
                         value={activeSocial?.url || window.location.href}
-                        size={84}
+                        size={96}
                         level="H"
                         includeMargin={false}
                         fgColor="#2563eb"
