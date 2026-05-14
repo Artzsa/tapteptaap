@@ -56,13 +56,27 @@ app.use('/api', require('./routes/integrations'));
 
 // ─── Serve Frontend Build (Production) ────────────────────────────────────
 const frontendDist = path.join(__dirname, '../client/dist');
-app.use(express.static(frontendDist));
 
-// Catch-all: kirim index.html untuk semua route non-API (biar React Router handle)
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(frontendDist, 'index.html'));
-});
+// Cek apakah folder dist ada, jika tidak kasih response informative
+const fs = require('fs');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+
+  // Catch-all: kirim index.html untuk semua route non-API (biar React Router handle)
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+} else {
+  // Fallback jika frontend belum di-build
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.status(200).json({
+      success: true,
+      message: 'VibeTape API is running. Frontend not built yet. Run: cd client && npm run build'
+    });
+  });
+}
 
 // ─── 404 Handler (hanya untuk API routes) ─────────────────────────────────
 app.use((req, res) => {
@@ -77,7 +91,7 @@ app.use((req, res) => {
 app.use((err, req, res, _next) => {
   console.error(`[ERROR] ${err.message}`, err.stack);
 
-  // Multer errors
+  // Multer errors (Express v4 compatibility)
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({
       success: false,
@@ -91,6 +105,15 @@ app.use((err, req, res, _next) => {
       success: false,
       error: err.message,
       code: 'INVALID_FILE_TYPE'
+    });
+  }
+
+  // MulterError for Express v4 multer
+  if (err.name === 'MulterError') {
+    return res.status(400).json({
+      success: false,
+      error: err.message,
+      code: 'UPLOAD_ERROR'
     });
   }
 

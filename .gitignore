@@ -5,3 +5,5 @@ uploads/*
 !uploads/.gitkeep
 temp_prd/
 scratch/
+client/dist
+vibetape-deploy.zip
