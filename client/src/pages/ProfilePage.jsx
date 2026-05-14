@@ -36,18 +36,20 @@ const SOCIAL_BASE = {
   whatsapp: { icon: MessageCircle, color: '#25D366' }
 };
 
-const getPlatformLogo = (platform) => {
+const getPlatformLogo = (platform, colored = false) => {
   const p = platform.toLowerCase();
   const base = "https://cdn.simpleicons.org/";
-  if (p.includes('instagram')) return `${base}instagram/white`;
-  if (p.includes('x') || p.includes('twitter')) return `${base}x/white`;
-  if (p.includes('whatsapp')) return `${base}whatsapp/white`;
-  if (p.includes('facebook')) return `${base}facebook/white`;
-  if (p.includes('github')) return `${base}github/white`;
-  if (p.includes('linkedin')) return `${base}linkedin/white`;
-  if (p.includes('youtube')) return `${base}youtube/white`;
-  if (p.includes('tiktok')) return `${base}tiktok/white`;
-  if (p.includes('telegram')) return `${base}telegram/white`;
+  const suffix = colored ? "" : "/white";
+  
+  if (p.includes('instagram')) return `${base}instagram${suffix}`;
+  if (p.includes('x') || p.includes('twitter')) return `${base}x${suffix}`;
+  if (p.includes('whatsapp')) return `${base}whatsapp${suffix}`;
+  if (p.includes('facebook')) return `${base}facebook${suffix}`;
+  if (p.includes('github')) return `${base}github${suffix}`;
+  if (p.includes('linkedin')) return `${base}linkedin${suffix}`;
+  if (p.includes('youtube')) return `${base}youtube${suffix}`;
+  if (p.includes('tiktok')) return `${base}tiktok${suffix}`;
+  if (p.includes('telegram')) return `${base}telegram${suffix}`;
   return null;
 };
 
@@ -158,7 +160,8 @@ const CustomQRCode = ({ value, themeHex, logo }) => {
       imageOptions: {
         crossOrigin: 'anonymous',
         margin: 5,
-        imageSize: 0.4
+        imageSize: 0.4,
+        hideBackgroundDots: true // Make the center clean for the logo
       },
       margin: 10
     });
@@ -423,7 +426,7 @@ END:VCARD`;
              <CustomQRCode 
                value={activeSocial?.url || window.location.href} 
                themeHex="#2563eb" 
-               logo={activeSocial ? getPlatformLogo(activeSocial.platform) : null}
+               logo={activeSocial ? getPlatformLogo(activeSocial.platform, true) : null}
              />
           </div>
 
