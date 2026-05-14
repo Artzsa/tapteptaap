@@ -114,15 +114,15 @@ const updateAvatar = async (req, res) => {
   }
 
   const username = req.user.username;
-  const avatarUrl = `/uploads/${req.file.filename}`;
+  const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
   try {
     await db.run(
       "UPDATE users SET avatar = $1 WHERE username = $2",
-      [avatarUrl, username]
+      [base64Image, username]
     );
 
-    res.json({ success: true, avatar: avatarUrl });
+    res.json({ success: true, avatar: base64Image });
   } catch (err) {
     console.error('Update avatar error:', err);
     return res.status(500).json({
@@ -143,15 +143,15 @@ const updateBackground = async (req, res) => {
   }
 
   const username = req.user.username;
-  const bgUrl = `/uploads/${req.file.filename}`;
+  const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
 
   try {
     await db.run(
       "UPDATE users SET bg_type = $1, bg_value = $2 WHERE username = $3",
-      ['image', bgUrl, username]
+      ['image', base64Image, username]
     );
 
-    res.json({ success: true, bg_type: 'image', bg_value: bgUrl });
+    res.json({ success: true, bg_type: 'image', bg_value: base64Image });
   } catch (err) {
     console.error('Update background error:', err);
     return res.status(500).json({
