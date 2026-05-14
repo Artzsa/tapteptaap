@@ -117,25 +117,29 @@ const CustomQRCode = ({ value, themeHex }) => {
 
   useEffect(() => {
     qrCodeRef.current = new QRCodeStyling({
-      width: 90,
-      height: 90,
+      width: 100,
+      height: 100,
       type: 'svg',
       data: value,
+      qrOptions: {
+        errorCorrectionLevel: 'H' // MANDATORY for scannability with custom designs
+      },
       dotsOptions: {
         color: themeHex || '#2563eb',
-        type: 'rounded' // Rounded blocks are much more scannable than dots
+        type: 'rounded'
       },
       backgroundOptions: {
         color: 'transparent',
       },
       cornersSquareOptions: {
         color: themeHex || '#2563eb',
-        type: 'extra-rounded' // Circular look for the 3 eyes
+        type: 'extra-rounded'
       },
       cornersDotOptions: {
         color: themeHex || '#2563eb',
         type: 'dot'
-      }
+      },
+      margin: 10 // Quiet Zone protection
     });
 
     if (ref.current) {
