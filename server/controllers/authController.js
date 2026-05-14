@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
 const { validateUsername, validatePassword, validateName, normalizeUsername, normalizeName } = require('../middleware/validators');
@@ -31,12 +31,7 @@ const register = async (req, res) => {
   }
 
   try {
-    const row = await new Promise((resolve, reject) => {
-      db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const row = await db.get("SELECT id FROM users WHERE username = $1", [username]);
 
     if (row) {
       return res.status(400).json({
@@ -50,21 +45,17 @@ const register = async (req, res) => {
     const bio = "Welcome to my VibeTape profile!";
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const result = await new Promise((resolve, reject) => {
-      db.run(
-        "INSERT INTO users (username, password, name, bio, avatar, tags) VALUES (?, ?, ?, ?, ?, ?)",
-        [username, hashedPassword, name, bio, avatar, ""],
-        function(err) {
-          if (err) reject(err);
-          else resolve({ id: this.lastID });
-        }
-      );
-    });
+    const result = await db.run(
+      "INSERT INTO users (username, password, name, bio, avatar, tags) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+      [username, hashedPassword, name, bio, avatar, ""]
+    );
+
+    const newUserId = result.rows[0].id;
 
     return res.json({
       success: true,
       message: "User registered successfully",
-      user: { id: result.id, username, name }
+      user: { id: newUserId, username, name }
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -90,12 +81,7 @@ const login = async (req, res) => {
   }
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id, username, name, password FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id, username, name, password FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(401).json({
@@ -113,7 +99,7 @@ const login = async (req, res) => {
       isValidPassword = password === user.password;
       if (isValidPassword) {
         const migratedHash = await bcrypt.hash(password, 10);
-        db.run("UPDATE users SET password = ? WHERE id = ?", [migratedHash, user.id]);
+        await db.run("UPDATE users SET password = $1 WHERE id = $2", [migratedHash, user.id]);
       }
     }
 
@@ -161,12 +147,7 @@ const forgotPassword = async (req, res) => {
   }
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id, username, name FROM users WHERE username = ?", [username.toLowerCase().trim()], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id, username, name FROM users WHERE username = $1", [username.toLowerCase().trim()]);
 
     // Always return success to prevent username enumeration
     if (!user) {
@@ -181,24 +162,13 @@ const forgotPassword = async (req, res) => {
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
     // Invalidate old tokens
-    await new Promise((resolve, reject) => {
-      db.run("UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0", [user.id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run("UPDATE password_resets SET used = 1 WHERE user_id = $1 AND used = 0", [user.id]);
 
     // Insert new token
-    await new Promise((resolve, reject) => {
-      db.run(
-        "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
-        [user.id, token, expiresAt],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
+    await db.run(
+      "INSERT INTO password_resets (user_id, token, expires_at) VALUES ($1, $2, $3)",
+      [user.id, token, expiresAt]
+    );
 
     // In production, send email. For now, return token directly.
     const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${token}`;
@@ -241,16 +211,10 @@ const resetPassword = async (req, res) => {
 
   try {
     // Find valid token
-    const resetRecord = await new Promise((resolve, reject) => {
-      db.get(
-        "SELECT id, user_id, expires_at, used FROM password_resets WHERE token = ?",
-        [token],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const resetRecord = await db.get(
+      "SELECT id, user_id, expires_at, used FROM password_resets WHERE token = $1",
+      [token]
+    );
 
     if (!resetRecord) {
       return res.status(400).json({
@@ -280,19 +244,8 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Update password and mark token as used
-    await new Promise((resolve, reject) => {
-      db.run("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, resetRecord.user_id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("UPDATE password_resets SET used = 1 WHERE id = ?", [resetRecord.id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, resetRecord.user_id]);
+    await db.run("UPDATE password_resets SET used = 1 WHERE id = $1", [resetRecord.id]);
 
     return res.json({
       success: true,

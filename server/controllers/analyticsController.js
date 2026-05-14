@@ -37,12 +37,7 @@ const trackClick = async (req, res) => {
   }
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(404).json({
@@ -52,16 +47,10 @@ const trackClick = async (req, res) => {
       });
     }
 
-    await new Promise((resolve, reject) => {
-      db.run(
-        "INSERT INTO link_clicks (user_id, platform, url, source) VALUES (?, ?, ?, ?)",
-        [user.id, platform, url, source],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
+    await db.run(
+      "INSERT INTO link_clicks (user_id, platform, url, source) VALUES ($1, $2, $3, $4)",
+      [user.id, platform, url, source]
+    );
 
     return res.json({ success: true });
   } catch (err) {
@@ -79,12 +68,7 @@ const getAnalytics = async (req, res) => {
   const days = Number(req.query.days) > 0 ? Math.min(Number(req.query.days), 90) : 30;
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(404).json({
@@ -109,59 +93,59 @@ const getAnalytics = async (req, res) => {
       recentRows
     ] = await Promise.all([
       // Current period views
-      queryDb(
-        `SELECT COUNT(*) as count FROM profile_views WHERE user_id = ? AND viewed_at >= datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(*) as count FROM profile_views WHERE user_id = $1 AND viewed_at >= NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Previous period views
-      queryDb(
-        `SELECT COUNT(*) as count FROM profile_views WHERE user_id = ? AND viewed_at >= datetime('now', '-${days * 2} days') AND viewed_at < datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(*) as count FROM profile_views WHERE user_id = $1 AND viewed_at >= NOW() - INTERVAL '${days * 2} days' AND viewed_at < NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Current period clicks
-      queryDb(
-        `SELECT COUNT(*) as count FROM link_clicks WHERE user_id = ? AND clicked_at >= datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(*) as count FROM link_clicks WHERE user_id = $1 AND clicked_at >= NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Previous period clicks
-      queryDb(
-        `SELECT COUNT(*) as count FROM link_clicks WHERE user_id = ? AND clicked_at >= datetime('now', '-${days * 2} days') AND clicked_at < datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(*) as count FROM link_clicks WHERE user_id = $1 AND clicked_at >= NOW() - INTERVAL '${days * 2} days' AND clicked_at < NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Current period unique visitors
-      queryDb(
-        `SELECT COUNT(DISTINCT viewer_ip) as count FROM profile_views WHERE user_id = ? AND viewed_at >= datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(DISTINCT viewer_ip) as count FROM profile_views WHERE user_id = $1 AND viewed_at >= NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Previous period unique visitors
-      queryDb(
-        `SELECT COUNT(DISTINCT viewer_ip) as count FROM profile_views WHERE user_id = ? AND viewed_at >= datetime('now', '-${days * 2} days') AND viewed_at < datetime('now', '-${days} days')`,
+      db.get(
+        `SELECT COUNT(DISTINCT viewer_ip) as count FROM profile_views WHERE user_id = $1 AND viewed_at >= NOW() - INTERVAL '${days * 2} days' AND viewed_at < NOW() - INTERVAL '${days} days'`,
         [userId]
       ),
       // Top links
-      queryDbAll(
+      db.all(
         `SELECT platform, COUNT(*) as clicks
          FROM link_clicks
-         WHERE user_id = ? AND clicked_at >= datetime('now', '-${days} days')
+         WHERE user_id = $1 AND clicked_at >= NOW() - INTERVAL '${days} days'
          GROUP BY platform
          ORDER BY clicks DESC
          LIMIT 5`,
         [userId]
       ),
       // Timeline
-      queryDbAll(
-        `SELECT DATE(viewed_at) as day, COUNT(*) as views
+      db.all(
+        `SELECT CAST(viewed_at AS DATE) as day, COUNT(*) as views
          FROM profile_views
-         WHERE user_id = ? AND viewed_at >= datetime('now', '-${days} days')
-         GROUP BY DATE(viewed_at)
+         WHERE user_id = $1 AND viewed_at >= NOW() - INTERVAL '${days} days'
+         GROUP BY day
          ORDER BY day ASC`,
         [userId]
       ),
       // Recent activity
-      queryDbAll(
+      db.all(
         `SELECT platform, source, clicked_at
          FROM link_clicks
-         WHERE user_id = ? AND clicked_at >= datetime('now', '-${days} days')
+         WHERE user_id = $1 AND clicked_at >= NOW() - INTERVAL '${days} days'
          ORDER BY clicked_at DESC
          LIMIT 10`,
         [userId]
@@ -211,24 +195,5 @@ const getAnalytics = async (req, res) => {
     });
   }
 };
-
-// Helper functions to promisify sqlite3
-function queryDb(sql, params) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
-}
-
-function queryDbAll(sql, params) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
-}
 
 module.exports = { trackClick, getAnalytics };

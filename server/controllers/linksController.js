@@ -51,12 +51,7 @@ const updateLinks = async (req, res) => {
   );
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(404).json({
@@ -66,29 +61,21 @@ const updateLinks = async (req, res) => {
       });
     }
 
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM links WHERE user_id = ?", [user.id], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run("DELETE FROM links WHERE user_id = $1", [user.id]);
 
     if (dedupedLinks.length === 0) {
       return res.json({ success: true });
     }
 
-    const placeholders = dedupedLinks.map(() => "(?, ?, ?)").join(", ");
+    // Build multi-row insert for PostgreSQL: ($1, $2, $3), ($4, $5, $6)...
     const values = [];
-    dedupedLinks.forEach(link => {
+    const placeholders = dedupedLinks.map((link, idx) => {
+      const base = idx * 3;
       values.push(user.id, link.platform, link.url);
-    });
+      return `($${base + 1}, $${base + 2}, $${base + 3})`;
+    }).join(", ");
 
-    await new Promise((resolve, reject) => {
-      db.run(`INSERT INTO links (user_id, platform, url) VALUES ${placeholders}`, values, function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run(`INSERT INTO links (user_id, platform, url) VALUES ${placeholders}`, values);
 
     res.json({ success: true });
   } catch (err) {

@@ -13,16 +13,10 @@ const getIntegrations = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const integrations = await new Promise((resolve, reject) => {
-      db.all(
-        "SELECT id, platform, connected, api_key, webhook_url, created_at FROM integrations WHERE user_id = ? ORDER BY platform ASC",
-        [userId],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        }
-      );
-    });
+    const integrations = await db.all(
+      "SELECT id, platform, connected, api_key, webhook_url, created_at FROM integrations WHERE user_id = $1 ORDER BY platform ASC",
+      [userId]
+    );
 
     // Merge with available platforms
     const result = AVAILABLE_PLATFORMS.map(platform => {
@@ -70,41 +64,23 @@ const connectIntegration = async (req, res) => {
 
   try {
     // Check if already exists
-    const existing = await new Promise((resolve, reject) => {
-      db.get(
-        "SELECT id FROM integrations WHERE user_id = ? AND platform = ?",
-        [userId, platform],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
-      );
-    });
+    const existing = await db.get(
+      "SELECT id FROM integrations WHERE user_id = $1 AND platform = $2",
+      [userId, platform]
+    );
 
     if (existing) {
       // Update existing
-      await new Promise((resolve, reject) => {
-        db.run(
-          "UPDATE integrations SET connected = 1, api_key = ?, webhook_url = ? WHERE user_id = ? AND platform = ?",
-          [api_key || null, webhook_url || null, userId, platform],
-          function(err) {
-            if (err) reject(err);
-            else resolve();
-          }
-        );
-      });
+      await db.run(
+        "UPDATE integrations SET connected = 1, api_key = $1, webhook_url = $2 WHERE user_id = $3 AND platform = $4",
+        [api_key || null, webhook_url || null, userId, platform]
+      );
     } else {
       // Create new
-      await new Promise((resolve, reject) => {
-        db.run(
-          "INSERT INTO integrations (user_id, platform, connected, api_key, webhook_url) VALUES (?, ?, 1, ?, ?)",
-          [userId, platform, api_key || null, webhook_url || null],
-          function(err) {
-            if (err) reject(err);
-            else resolve();
-          }
-        );
-      });
+      await db.run(
+        "INSERT INTO integrations (user_id, platform, connected, api_key, webhook_url) VALUES ($1, $2, 1, $3, $4)",
+        [userId, platform, api_key || null, webhook_url || null]
+      );
     }
 
     res.json({ success: true, message: `${platform} connected successfully` });
@@ -131,16 +107,10 @@ const disconnectIntegration = async (req, res) => {
   }
 
   try {
-    await new Promise((resolve, reject) => {
-      db.run(
-        "UPDATE integrations SET connected = 0, api_key = NULL, webhook_url = NULL WHERE user_id = ? AND platform = ?",
-        [userId, platform],
-        function(err) {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
+    await db.run(
+      "UPDATE integrations SET connected = 0, api_key = NULL, webhook_url = NULL WHERE user_id = $1 AND platform = $2",
+      [userId, platform]
+    );
 
     res.json({ success: true, message: `${platform} disconnected successfully` });
   } catch (err) {

@@ -1,5 +1,5 @@
 const db = require('../db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
@@ -22,12 +22,7 @@ const changePassword = async (req, res) => {
   }
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT password FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT password FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(404).json({
@@ -47,12 +42,7 @@ const changePassword = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await new Promise((resolve, reject) => {
-      db.run("UPDATE users SET password = ? WHERE username = ?", [hashedPassword, username], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run("UPDATE users SET password = $1 WHERE username = $2", [hashedPassword, username]);
 
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (err) {
@@ -70,16 +60,10 @@ const updateAccount = async (req, res) => {
   const username = req.user.username;
 
   try {
-    await new Promise((resolve, reject) => {
-      db.run(
-        "UPDATE users SET email = ?, name = ? WHERE username = ?",
-        [email, name, username],
-        function(err) {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
+    await db.run(
+      "UPDATE users SET email = $1, name = $2 WHERE username = $3",
+      [email, name, username]
+    );
 
     res.json({ success: true, message: 'Account updated successfully' });
   } catch (err) {
@@ -105,12 +89,7 @@ const deleteAccount = async (req, res) => {
   }
 
   try {
-    const user = await new Promise((resolve, reject) => {
-      db.get("SELECT id, password FROM users WHERE username = ?", [username], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await db.get("SELECT id, password FROM users WHERE username = $1", [username]);
 
     if (!user) {
       return res.status(404).json({
@@ -132,47 +111,12 @@ const deleteAccount = async (req, res) => {
     const userId = user.id;
 
     // Delete all related data
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM links WHERE user_id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM profile_views WHERE user_id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM link_clicks WHERE user_id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM password_resets WHERE user_id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM integrations WHERE user_id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    await new Promise((resolve, reject) => {
-      db.run("DELETE FROM users WHERE id = ?", [userId], function(err) {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await db.run("DELETE FROM links WHERE user_id = $1", [userId]);
+    await db.run("DELETE FROM profile_views WHERE user_id = $1", [userId]);
+    await db.run("DELETE FROM link_clicks WHERE user_id = $1", [userId]);
+    await db.run("DELETE FROM password_resets WHERE user_id = $1", [userId]);
+    await db.run("DELETE FROM integrations WHERE user_id = $1", [userId]);
+    await db.run("DELETE FROM users WHERE id = $1", [userId]);
 
     res.json({ success: true, message: 'Account deleted successfully' });
   } catch (err) {
