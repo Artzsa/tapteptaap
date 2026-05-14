@@ -36,6 +36,21 @@ const SOCIAL_BASE = {
   whatsapp: { icon: MessageCircle, color: '#25D366' }
 };
 
+const getPlatformLogo = (platform) => {
+  const p = platform.toLowerCase();
+  const base = "https://cdn.simpleicons.org/";
+  if (p.includes('instagram')) return `${base}instagram/white`;
+  if (p.includes('x') || p.includes('twitter')) return `${base}x/white`;
+  if (p.includes('whatsapp')) return `${base}whatsapp/white`;
+  if (p.includes('facebook')) return `${base}facebook/white`;
+  if (p.includes('github')) return `${base}github/white`;
+  if (p.includes('linkedin')) return `${base}linkedin/white`;
+  if (p.includes('youtube')) return `${base}youtube/white`;
+  if (p.includes('tiktok')) return `${base}tiktok/white`;
+  if (p.includes('telegram')) return `${base}telegram/white`;
+  return null;
+};
+
 const THEMES = {
   cyan: {
     border: 'border-cyan-500',
@@ -111,25 +126,25 @@ const THEMES = {
 
 
 
-const CustomQRCode = ({ value, themeHex }) => {
+const CustomQRCode = ({ value, themeHex, logo }) => {
   const ref = useRef(null);
   const qrCodeRef = useRef(null);
 
   useEffect(() => {
     qrCodeRef.current = new QRCodeStyling({
-      width: 100,
-      height: 100,
+      width: 180,
+      height: 180,
       type: 'svg',
       data: value,
       qrOptions: {
-        errorCorrectionLevel: 'H' // MANDATORY for scannability with custom designs
+        errorCorrectionLevel: 'H'
       },
       dotsOptions: {
         color: themeHex || '#2563eb',
         type: 'rounded'
       },
       backgroundOptions: {
-        color: 'transparent',
+        color: '#ffffff',
       },
       cornersSquareOptions: {
         color: themeHex || '#2563eb',
@@ -139,7 +154,13 @@ const CustomQRCode = ({ value, themeHex }) => {
         color: themeHex || '#2563eb',
         type: 'dot'
       },
-      margin: 10 // Quiet Zone protection
+      image: logo,
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: 5,
+        imageSize: 0.4
+      },
+      margin: 10
     });
 
     if (ref.current) {
@@ -149,9 +170,9 @@ const CustomQRCode = ({ value, themeHex }) => {
     return () => {
       if (ref.current) ref.current.innerHTML = '';
     };
-  }, [value, themeHex]);
+  }, [value, themeHex, logo]);
 
-  return <div ref={ref} className="flex items-center justify-center" />;
+  return <div ref={ref} className="flex items-center justify-center rounded-[32px] overflow-hidden shadow-2xl border-4 border-white/20" />;
 };
 
 const ProfilePage = () => {
@@ -396,63 +417,40 @@ END:VCARD`;
             </motion.button>
           </div>
 
-          {/* Holographic Rotary System */}
-          <div className="relative h-[320px] flex items-center justify-center my-8">
-            {/* Background Tech Rings */}
-            <div className="absolute w-64 h-64 border border-white/5 rounded-full" />
-            <div className={`absolute w-72 h-72 border border-dashed ${theme.borderFade} rounded-full animate-[spin_30s_linear_infinite]`} />
-            
-            {/* Active Glow Beam (Radar Sweep) */}
-            {activeSocial && (
-                <motion.div
-                    animate={{ rotate: activeSocial.angle }}
-                    transition={{ type: 'spring', stiffness: 60, damping: 20 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    style={{ zIndex: 10 }}
-                >
-                    <div 
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px]"
-                      style={{
-                        background: 'conic-gradient(from -30deg at 50% 50%, rgba(255,255,255,0.4) 0deg, rgba(255,255,255,0.1) 20deg, transparent 60deg)',
-                        clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%)',
-                        filter: 'blur(2px)'
-                      }}
-                    />
-                </motion.div>
-            )}
+          {/* Central QR Display */}
+          <div className="flex justify-center my-10 relative">
+             <div className="absolute inset-0 bg-blue-600/20 blur-[80px] rounded-full animate-pulse" />
+             <CustomQRCode 
+               value={activeSocial?.url || window.location.href} 
+               themeHex="#2563eb" 
+               logo={activeSocial ? getPlatformLogo(activeSocial.platform) : null}
+             />
+          </div>
 
-            {/* Central Node with Particle Dissolve QR */}
-            <div className="relative z-20 w-36 h-36 rounded-full bg-white shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col items-center justify-center group overflow-hidden border-8 border-white/10">
-                {/* Truly Circular QR using qr-code-styling */}
-                <div className="relative w-30 h-30 flex items-center justify-center scale-110">
-                   <CustomQRCode value={activeSocial?.url || window.location.href} themeHex="#2563eb" />
-                </div>
-            </div>
-
-            {/* Orbiting Platform Nodes */}
+          {/* Social Links Grid (4 Columns) */}
+          <div className="grid grid-cols-4 gap-4 px-2 mb-8">
             {displayLinks.map((item, idx) => {
-              const pos = getPosition(item.angle, 135);
-              const isActive = activeIndex === idx;
               const Icon = item.icon;
-
+              const isActive = activeIndex === idx;
+              
               return (
                 <motion.button
                   key={idx}
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setActiveIndex(idx)}
-                  style={{ x: pos.x, y: pos.y }}
-                  className="absolute z-30"
-                  whileHover={{ scale: 1.2 }}
+                  className="flex flex-col items-center gap-2 group"
                 >
-                  <div className={`w-12 h-12 rounded-[14px] border-2 transition-all duration-500 flex items-center justify-center ${
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border ${
                     isActive 
-                    ? 'bg-white border-white text-black shadow-[0_0_25px_rgba(255,255,255,0.5)]' 
-                    : 'bg-[#0A0F1E] border-white/10 text-white/40 hover:text-white hover:border-white/30'
+                    ? 'bg-blue-600 border-blue-400 text-white shadow-[0_10px_20px_rgba(37,99,235,0.4)]' 
+                    : 'bg-white/5 border-white/10 text-white/40 group-hover:border-white/30 group-hover:text-white'
                   }`}>
-                    <Icon size={20} />
-                    {isActive && (
-                        <div className="absolute -inset-1 rounded-[16px] border border-white/20 animate-pulse" />
-                    )}
+                    <Icon size={24} />
                   </div>
+                  <span className={`text-[8px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-white' : 'text-white/30'}`}>
+                    {item.platform}
+                  </span>
                 </motion.button>
               );
             })}
