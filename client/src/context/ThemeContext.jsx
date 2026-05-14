@@ -14,9 +14,9 @@ export const ThemeProvider = ({ children }) => {
     if (isDark) {
       root.classList.add('dark');
       root.classList.remove('light');
-      root.style.setProperty('--bg-primary', '#05070A');
-      root.style.setProperty('--bg-secondary', '#0A0C10');
-      root.style.setProperty('--bg-card', '#0A0F1E');
+      root.style.setProperty('--bg-primary', '#020617');
+      root.style.setProperty('--bg-secondary', '#050a1f');
+      root.style.setProperty('--bg-card', '#070e2b');
       root.style.setProperty('--text-primary', '#FFFFFF');
       root.style.setProperty('--text-secondary', '#A1A1AA');
       root.style.setProperty('--border-color', 'rgba(255,255,255,0.05)');

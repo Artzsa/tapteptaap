@@ -51,18 +51,18 @@ const THEMES = {
     gradientBg: 'bg-cyan-600/10'
   },
   emerald: {
-    border: 'border-emerald-500',
-    borderFade: 'border-emerald-500/20',
-    borderFadeStrong: 'border-emerald-500/30',
-    text: 'text-emerald-500',
-    textLight: 'text-emerald-400',
-    bg: 'bg-emerald-500',
-    bgFade: 'bg-emerald-500/10',
-    bgMedium: 'bg-emerald-500/50',
-    shadow: 'shadow-[0_0_20px_rgba(16,185,129,0.5)]',
-    shadowLarge: 'shadow-[0_10px_30px_rgba(16,185,129,0.3)]',
-    beam: 'from-emerald-500/20',
-    gradientBg: 'bg-emerald-600/10'
+    border: 'border-blue-600',
+    borderFade: 'border-blue-600/20',
+    borderFadeStrong: 'border-blue-600/30',
+    text: 'text-blue-500',
+    textLight: 'text-blue-400',
+    bg: 'bg-blue-600',
+    bgFade: 'bg-blue-600/10',
+    bgMedium: 'bg-blue-600/50',
+    shadow: 'shadow-[0_0_20px_rgba(37,99,235,0.5)]',
+    shadowLarge: 'shadow-[0_10px_30px_rgba(37,99,235,0.3)]',
+    beam: 'from-blue-600/20',
+    gradientBg: 'bg-blue-700/10'
   },
   purple: {
     border: 'border-purple-500',
@@ -454,7 +454,7 @@ END:VCARD`;
   // Map theme key to hex color for QR animations
   const themeHexMap = {
     cyan: '#06b6d4',
-    emerald: '#10b981',
+    emerald: '#2563eb',
     purple: '#a855f7',
     rose: '#f43f5e',
     amber: '#f59e0b'
@@ -462,7 +462,7 @@ END:VCARD`;
   const themeHex = themeHexMap[themeKey] || '#06b6d4';
 
   if (loading) return (
-    <div className="min-h-screen bg-[#02040A] flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center">
         <motion.div 
             animate={{ scale: [1, 1.2, 1], rotate: 360 }} 
             transition={{ duration: 2, repeat: Infinity }}
@@ -565,23 +565,29 @@ END:VCARD`;
             <div className="absolute w-64 h-64 border border-white/5 rounded-full" />
             <div className={`absolute w-72 h-72 border border-dashed ${theme.borderFade} rounded-full animate-[spin_30s_linear_infinite]`} />
             
-            {/* Active Glow Beam */}
+            {/* Active Glow Beam (Radar Sweep) */}
             {activeSocial && (
                 <motion.div
                     animate={{ rotate: activeSocial.angle }}
-                    transition={{ type: 'spring', stiffness: 40, damping: 12 }}
-                    className="absolute inset-0 flex justify-center"
+                    transition={{ type: 'spring', stiffness: 60, damping: 20 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    style={{ zIndex: 10 }}
                 >
-                    <div className={`w-[100px] h-[150px] bg-gradient-to-b ${theme.beam} to-transparent blur-[30px] rounded-full`} />
+                    <div 
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px]"
+                      style={{
+                        background: 'conic-gradient(from -30deg at 50% 50%, rgba(255,255,255,0.4) 0deg, rgba(255,255,255,0.1) 20deg, transparent 60deg)',
+                        clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%)',
+                        filter: 'blur(2px)'
+                      }}
+                    />
                 </motion.div>
             )}
 
             {/* Central Node with Particle Dissolve QR */}
-            <div className="relative z-20 w-36 h-36 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] flex flex-col items-center justify-center group overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
-                
+            <div className="relative z-20 w-36 h-36 rounded-full bg-white shadow-[0_0_50px_rgba(255,255,255,0.2)] flex flex-col items-center justify-center group overflow-hidden border-8 border-white/10">
                 {/* Particle Dissolve QR */}
-                <div className="relative w-20 h-20 flex items-center justify-center">
+                <div className="relative w-24 h-24 flex items-center justify-center">
                   <canvas 
                     ref={el => {
                       if (el && !particleRef.current) {
@@ -589,23 +595,21 @@ END:VCARD`;
                         window.__particleQR = window.__particleQR || {};
                       }
                     }}
-                    width={80}
-                    height={80}
+                    width={96}
+                    height={96}
                     className="absolute inset-0 w-full h-full"
                   />
                   {showNewQR && (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <QRCodeSVG 
                         value={activeSocial?.url || window.location.href}
-                        size={80}
+                        size={84}
                         level="H"
+                        includeMargin={false}
+                        fgColor="#2563eb"
                       />
                     </div>
                   )}
-                </div>
-                
-                <div className="mt-2 text-[8px] font-black tracking-[0.4em] text-black uppercase opacity-60">
-                  {activeSocial ? `Link: ${activeSocial.platform}` : 'Handshake'}
                 </div>
             </div>
 
@@ -648,32 +652,18 @@ END:VCARD`;
                 exit={{ opacity: 0, x: 10 }}
                 className="space-y-4"
               >
-                <div className="flex items-end justify-between px-2">
-                    <div>
-                        <div className={`text-[8px] font-black ${theme.text} uppercase tracking-[0.4em] mb-1`}>Target Protocol</div>
-                        <div className="text-2xl font-black uppercase italic tracking-tighter text-white">
-                            {activeSocial.platform}
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] mb-1">Link Status</div>
-                        <div className="text-xs font-bold text-green-400 uppercase tracking-widest flex items-center gap-1 justify-end">
-                            <span className="w-1 h-1 rounded-full bg-green-400" />
-                            Encrypted
-                        </div>
-                    </div>
+                <div className="pt-4">
+                  <a 
+                    href={activeSocial.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(event) => trackAndOpenLink(event, activeSocial)}
+                    className="group relative flex items-center justify-center w-full bg-white text-blue-700 py-5 rounded-full font-black uppercase tracking-widest shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all duration-300"
+                  >
+                    Open {activeSocial.platform}
+                    <ExternalLink size={18} className="ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </a>
                 </div>
-
-                <a 
-                  href={activeSocial.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(event) => trackAndOpenLink(event, activeSocial)}
-                  className={`group relative flex items-center justify-center w-full bg-white text-black py-4 rounded-2xl font-black uppercase italic tracking-[0.2em] shadow-[0_10px_40px_rgba(255,255,255,0.2)] hover:${theme.bg} transition-colors duration-300`}
-                >
-                  Initiate Link
-                  <ExternalLink size={18} className="ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </a>
               </motion.div>
             ) : (
                 <div className="text-center text-[10px] font-black text-zinc-700 uppercase tracking-[0.5em] py-8">
