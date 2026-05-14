@@ -27,7 +27,11 @@
       "destination": "/client/assets/$1"
     },
     {
-      "source": "/((?!api|uploads|assets).*)",
+      "source": "/u/(.*)",
+      "destination": "/server/index.js"
+    },
+    {
+      "source": "/((?!api|uploads|assets|u).*)",
       "destination": "/client/index.html"
     }
   ]

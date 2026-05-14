@@ -77,6 +77,46 @@ const frontendDist = fs.existsSync(path.join(__dirname, '../client/dist'))
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
 
+  // ─── Dynamic Meta Tag Injection for Social Sharing ───────────────────────
+  app.get('/u/:username', async (req, res) => {
+    const { username } = req.params;
+    const db = require('./db');
+    
+    try {
+      const user = await db.get("SELECT name, bio FROM users WHERE username = $1", [username]);
+      const htmlPath = path.join(frontendDist, 'index.html');
+      
+      if (!fs.existsSync(htmlPath)) {
+        return res.status(404).send('Build not found');
+      }
+
+      let html = fs.readFileSync(htmlPath, 'utf8');
+
+      if (user) {
+        const title = `${user.name} (@${username}) | VibeTape`;
+        const desc = user.bio || `View ${user.name}'s digital card on VibeTape.`;
+        const siteUrl = "https://tapteptaap.vercel.app"; // Update with production URL
+        const profileUrl = `${siteUrl}/u/${username}`;
+
+        // Inject dynamic tags
+        html = html.replace(/<title>.*?<\/title>/g, `<title>${title}</title>`);
+        html = html.replace(/<meta property="og:title" content=".*?" \/>/g, `<meta property="og:title" content="${title}" />`);
+        html = html.replace(/<meta property="og:description" content=".*?" \/>/g, `<meta property="og:description" content="${desc}" />`);
+        html = html.replace(/<meta property="og:url" content=".*?" \/>/g, `<meta property="og:url" content="${profileUrl}" />`);
+        html = html.replace(/<meta name="description" content=".*?" \/>/g, `<meta name="description" content="${desc}" />`);
+        
+        // For image, we use a generic but nice branding image since Base64 isn't supported by bots
+        // html = html.replace(/<meta property="og:image" content=".*?" \/>/g, `<meta property="og:image" content="${siteUrl}/og-profile-preview.png" />`);
+      }
+      
+      res.set('Content-Type', 'text/html');
+      return res.send(html);
+    } catch (err) {
+      console.error('Meta injection error:', err);
+      return res.sendFile(path.join(frontendDist, 'index.html'));
+    }
+  });
+
   // Catch-all: kirim index.html untuk semua route non-API (biar React Router handle)
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) return next();
