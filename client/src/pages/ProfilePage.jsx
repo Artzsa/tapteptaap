@@ -31,7 +31,8 @@ const SOCIAL_BASE = {
   x: { icon: MessageCircle, color: '#1DA1F2' },
   github: { icon: Code2, color: '#333' },
   linkedin: { icon: Briefcase, color: '#0077B5' },
-  youtube: { icon: Video, color: '#FF0000' }
+  youtube: { icon: Video, color: '#FF0000' },
+  whatsapp: { icon: MessageCircle, color: '#25D366' }
 };
 
 const THEMES = {
