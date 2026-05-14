@@ -35,10 +35,16 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    // Allow development environments
     if (!isProduction) return callback(null, true);
+    // Allow configured origins
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS origin not allowed'));
+    // Allow any Vercel preview/production domains dynamically
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    
+    return callback(new Error(`CORS origin not allowed: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
