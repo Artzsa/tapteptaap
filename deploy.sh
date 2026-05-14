@@ -47,20 +47,27 @@ else
   echo "✅ [3/4] server/.env already exists"
 fi
 
-# --- 4. Copy to Hostinger public_html ---
+# --- 4. Copy to Hostinger structure ---
 echo ""
-echo "📂 [4/4] Copying files to $DEPLOY_PATH..."
-mkdir -p $DEPLOY_PATH
-cp -r client/dist $DEPLOY_PATH/client/
-cp -r server $DEPLOY_PATH/server/
-cp package.json $DEPLOY_PATH/
+echo "📂 [4/4] Preparing deployment folder..."
+rm -rf deploy_ready
+mkdir -p deploy_ready/client/dist
+
+# Copy backend files to root of deploy_ready
+cp -r server/* deploy_ready/
+# Copy frontend build to client/dist inside deploy_ready
+cp -r client/dist/* deploy_ready/client/dist/
 
 echo ""
-echo "✅ Done! Files copied to $DEPLOY_PATH"
+echo "✅ Done! Files prepared in ./deploy_ready"
+echo "   Silakan upload isi folder 'deploy_ready' ke Hostinger."
 echo ""
-echo "📋 Next steps:"
-echo "   1. SSH ke Hostinger dan pastiin Node.js udah aktif via Node.js Selector"
-echo "   2. Masuk ke folder: cd $DEPLOY_PATH/server"
-echo "   3. Jalankan: npm start"
-echo ""
-echo "   Atau kalo pake PM2: pm2 start server/index.js --name vibetape"
+echo "📋 Next steps (Hostinger hPanel):"
+echo "   1. Masuk ke menu 'Node.js'"
+echo "   2. Set 'Application Root' ke folder tempat kamu upload (misal: public_html)"
+echo "   3. Set 'Application Startup File' ke 'index.js'"
+echo "   4. Tambahkan 'Environment Variables':"
+echo "      - NODE_ENV = production"
+echo "      - JWT_SECRET = (string random)"
+echo "      - CORS_ORIGINS = https://yourdomain.com"
+echo "   5. Klik 'Run npm install' (jika ada) lalu 'Restart'"

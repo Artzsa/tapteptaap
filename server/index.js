@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -14,8 +15,14 @@ if (process.env.NODE_ENV === 'production') {
 
 const missingEnvVars = requiredEnvVars.filter((v) => !process.env[v]);
 if (missingEnvVars.length > 0) {
-  console.error(`[FATAL] Missing required environment variables: ${missingEnvVars.join(', ')}`);
-  process.exit(1);
+  console.error(`\n[CRITICAL ERROR] Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.error(`Silakan set variabel ini di Dashboard Hostinger -> Node.js -> Environment Variables.\n`);
+  
+  // Jangan exit(1) agar server tetap jalan dan user bisa cek log di dashboard
+  // Namun aplikasi tidak akan berfungsi dengan benar sampai env diset.
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[WARNING] Server started without all required ENV variables. JWT functions might fail.');
+  }
 }
 
 // ─── CORS Configuration ───────────────────────────────────────────────────
@@ -55,10 +62,12 @@ app.use('/api', require('./routes/settings'));
 app.use('/api', require('./routes/integrations'));
 
 // ─── Serve Frontend Build (Production) ────────────────────────────────────
-const frontendDist = path.join(__dirname, '../client/dist');
+// Coba cari dist di beberapa lokasi umum (Hostinger root vs server folder)
+const frontendDist = fs.existsSync(path.join(__dirname, '../client/dist')) 
+  ? path.join(__dirname, '../client/dist')
+  : path.join(__dirname, 'client/dist'); // Fallback jika struktur berubah
 
 // Cek apakah folder dist ada, jika tidak kasih response informative
-const fs = require('fs');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
 
