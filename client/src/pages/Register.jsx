@@ -84,7 +84,7 @@ const Register = () => {
         if (serverError.details.name) serverFieldErrors.name = serverError.details.name;
         setFieldErrors(serverFieldErrors);
       }
-      const msg = serverError?.error || 'Registration failed. Try again.';
+      const msg = serverError?.details ? `${serverError.error}: ${serverError.details}` : (serverError?.error || 'Registration failed. Try again.');
       setError(msg);
       addToast(msg, 'error');
     } finally {
