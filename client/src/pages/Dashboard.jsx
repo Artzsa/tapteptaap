@@ -536,7 +536,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-black tracking-tight truncate w-32">{user?.name}</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate w-32 lowercase">{user?.username}.link</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate w-32 lowercase">{window.location.host}/u/{user?.username}</span>
                 </div>
               </div>
               {/* Navigation */}
@@ -632,7 +632,7 @@ const Dashboard = () => {
             </div>
             <div className="flex flex-col">
           <span className="text-sm font-black tracking-tight truncate w-32">{user?.name}</span>
-          <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate w-32 lowercase">{user?.username}.link</span>
+          <span className="text-[10px] text-[var(--text-secondary)] font-bold truncate w-32 lowercase">{window.location.host}/u/{user?.username}</span>
             </div>
           </div>
           <MoreVertical size={16} className="text-[var(--text-secondary)] cursor-pointer" />
@@ -790,7 +790,7 @@ const Dashboard = () => {
                           <div className="absolute inset-4 rounded-full border border-white/10 animate-[spin_20s_linear_infinite]" />
                           <div className="absolute inset-0 flex items-center justify-center">
                              <div className="w-40 h-40 bg-white rounded-3xl p-3 shadow-2xl">
-                               <QRCodeSVG value={`http://localhost:5173/u/${user?.username}`} size={136} />
+                               <QRCodeSVG value={`${window.location.origin}/u/${user?.username}`} size={136} />
                              </div>
                           </div>
                           {/* Orbiting Platform Icons Placeholder */}
@@ -808,10 +808,15 @@ const Dashboard = () => {
                          <span className="text-xs font-black text-[var(--text-secondary)] uppercase tracking-widest">Your Card Live Link</span>
                          <Copy size={14} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors" />
                        </div>
-                       <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] p-4 rounded-xl flex items-center justify-between group">
-                          <span className="text-xs font-medium text-[var(--text-secondary)] truncate w-48">https://{user?.username}.link</span>
+                       <a 
+                          href={`${window.location.origin}/u/${user?.username}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="bg-[var(--bg-primary)] border border-[var(--border-color)] p-4 rounded-xl flex items-center justify-between group cursor-pointer hover:border-blue-500/50 transition-all"
+                        >
+                          <span className="text-xs font-medium text-[var(--text-secondary)] truncate w-48">{window.location.host}/u/{user?.username}</span>
                           <ExternalLink size={14} className="text-[var(--text-secondary)] group-hover:text-blue-500" />
-                       </div>
+                        </a>
                     </div>
 
                     <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-6 space-y-6">
