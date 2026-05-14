@@ -441,12 +441,20 @@ END:VCARD`;
                   onClick={() => setActiveIndex(idx)}
                   className="flex flex-col items-center gap-2 group"
                 >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border ${
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border overflow-hidden ${
                     isActive 
-                    ? 'bg-blue-600 border-blue-400 text-white shadow-[0_10px_20px_rgba(37,99,235,0.4)]' 
-                    : 'bg-white/5 border-white/10 text-white/40 group-hover:border-white/30 group-hover:text-white'
+                    ? 'bg-blue-600 border-blue-400 shadow-[0_10px_20px_rgba(37,99,235,0.4)]' 
+                    : 'bg-white/5 border-white/10 group-hover:border-white/30'
                   }`}>
-                    <Icon size={24} />
+                    {getPlatformLogo(item.platform) ? (
+                      <img 
+                        src={getPlatformLogo(item.platform)} 
+                        alt={item.platform}
+                        className={`w-6 h-6 transition-all ${isActive ? 'opacity-100 scale-110' : 'opacity-30 group-hover:opacity-100'}`}
+                      />
+                    ) : (
+                      <Icon size={24} className={isActive ? 'text-white' : 'text-white/40'} />
+                    )}
                   </div>
                   <span className={`text-[8px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-white' : 'text-white/30'}`}>
                     {item.platform}
