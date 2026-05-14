@@ -84,7 +84,7 @@ const CHART_SKELETON_HEIGHTS = [35, 55, 40, 70, 45, 85, 50, 65, 75, 48, 60, 42];
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000';
 const getAvatarUrl = (avatar) => {
   if (!avatar) return null;
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  if (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:')) return avatar;
   return `${API_BASE}${avatar}`;
 };
 

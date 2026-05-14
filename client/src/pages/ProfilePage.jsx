@@ -21,7 +21,7 @@ import api from '../api';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000';
 const getAvatarUrl = (avatar) => {
   if (!avatar) return null;
-  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  if (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:')) return avatar;
   return `${API_BASE}${avatar}`;
 };
 
