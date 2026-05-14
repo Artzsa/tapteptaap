@@ -340,42 +340,54 @@ END:VCARD`;
              <div className={`w-1 h-1 rounded-full ${theme.bg} animate-pulse`} />
           </div>
 
-          {/* Profile Header */}
-          <div className="mt-6 flex flex-col items-center text-center">
-            <div className="relative mb-6">
-                <div className={`absolute inset-[-8px] rounded-[32px] border ${theme.borderFadeStrong} animate-[spin_10s_linear_infinite]`} />
-                <div className="absolute inset-[-4px] rounded-[28px] border border-white/10 animate-[spin_7s_linear_infinite_reverse]" />
-                <div className="relative w-24 h-24 rounded-[24px] bg-zinc-900 border border-white/10 overflow-hidden">
-                    <img 
-                        src={getAvatarUrl(user?.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`} 
-                        className="w-full h-full object-cover grayscale-[0.2] contrast-125"
-                        alt="Agent"
-                    />
-                </div>
-            </div>
-
-            <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{user?.name}</h1>
-            <div className="flex items-center gap-3 mt-2">
-                <div className={`flex items-center gap-1 text-[9px] font-black ${theme.textLight} ${theme.bgFade} px-2 py-1 rounded-md border ${theme.borderFade} uppercase tracking-[0.2em]`}>
-                    <Cpu size={10} />
-                    Core ID: {user?.username}
-                </div>
-                {user?.location && (
-                  <div className="flex items-center gap-1 text-[9px] font-black text-white/50 px-2 py-1 uppercase tracking-[0.2em]">
-                      <MapPin size={10} />
-                      {user.location}
+          {/* Profile Header (Horizontal Layout) */}
+          <div className="mt-10 mb-6 px-2">
+            <div className="flex items-center gap-5">
+              {/* Left: Avatar */}
+              <div className="relative flex-shrink-0">
+                  <div className={`absolute inset-[-6px] rounded-[28px] border-2 ${theme.borderFadeStrong} opacity-50`} />
+                  <div className="relative w-20 h-20 rounded-[22px] bg-zinc-900 border border-white/10 overflow-hidden shadow-2xl">
+                      <img 
+                          src={getAvatarUrl(user?.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`} 
+                          className="w-full h-full object-cover"
+                          alt="Avatar"
+                      />
                   </div>
-                )}
+              </div>
+
+              {/* Right: Identity */}
+              <div className="flex flex-col text-left overflow-hidden">
+                  <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-tight truncate">{user?.name}</h1>
+                  <p className="text-[10px] font-bold text-white/60 leading-relaxed mt-1 line-clamp-2 italic">{user?.bio}</p>
+                  
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="flex items-center gap-1 text-[8px] font-black text-white/40 uppercase tracking-widest">
+                        <MapPin size={10} className={theme.text} />
+                        {user?.location || "Neural Space"}
+                    </div>
+                  </div>
+              </div>
             </div>
 
-            {/* Save Contact Button */}
+            {/* Tags / Skills Row */}
+            <div className="flex flex-wrap gap-1.5 mt-6">
+                {(user?.tags || []).map((tag, i) => (
+                  <span key={i} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[8px] font-black text-white/40 uppercase tracking-[0.2em] hover:bg-white/10 transition-colors">
+                    {tag}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          {/* Save Contact Button (Minimal) */}
+          <div className="px-2 mb-8">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={downloadVCard}
-              className={`mt-6 flex items-center gap-2 ${theme.bg} text-black px-6 py-2.5 rounded-2xl font-black uppercase italic tracking-wider text-xs ${theme.shadowLarge} transition-all`}
+              className={`w-full flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white/60 py-3 rounded-2xl font-black uppercase italic tracking-wider text-[10px] hover:bg-white/10 hover:text-white transition-all`}
             >
-              <UserPlus size={16} />
+              <UserPlus size={14} />
               Add to Contacts
             </motion.button>
           </div>
