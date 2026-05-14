@@ -372,12 +372,43 @@ const Dashboard = () => {
   };
   const getPlatformVisual = (platform) => {
     const normalized = String(platform || '').toLowerCase();
-    if (normalized.includes('linkedin')) return { icon: <Briefcase size={16} />, color: 'bg-blue-500' };
-    if (normalized.includes('instagram')) return { icon: <Camera size={16} />, color: 'bg-pink-500' };
+    if (normalized.includes('linkedin')) return { icon: <Briefcase size={16} />, color: 'bg-blue-600' };
+    if (normalized.includes('instagram')) return { icon: <Camera size={16} />, color: 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600' };
     if (normalized === 'x' || normalized.includes('twitter')) return { icon: <Hash size={16} />, color: 'bg-white' };
-    if (normalized.includes('github')) return { icon: <Code2 size={16} />, color: 'bg-purple-500' };
+    if (normalized.includes('github')) return { icon: <Code2 size={16} />, color: 'bg-zinc-800' };
     if (normalized.includes('threads')) return { icon: <AtSign size={16} />, color: 'bg-white' };
+    if (normalized.includes('youtube')) return { icon: <Palette size={16} />, color: 'bg-red-600' };
+    if (normalized.includes('tiktok')) return { icon: <Palette size={16} />, color: 'bg-zinc-900' };
+    if (normalized.includes('whatsapp')) return { icon: <MessageSquare size={16} />, color: 'bg-emerald-500' };
+    if (normalized.includes('discord')) return { icon: <Users size={16} />, color: 'bg-indigo-500' };
+    if (normalized.includes('facebook')) return { icon: <Globe size={16} />, color: 'bg-blue-700' };
+    if (normalized.includes('telegram')) return { icon: <AtSign size={16} />, color: 'bg-sky-500' };
     return { icon: <LinkIcon size={16} />, color: 'bg-blue-500' };
+  };
+
+  const quickAddLink = (platform) => {
+    const templates = {
+      'Instagram': 'https://instagram.com/',
+      'X': 'https://x.com/',
+      'LinkedIn': 'https://linkedin.com/in/',
+      'GitHub': 'https://github.com/',
+      'YouTube': 'https://youtube.com/@',
+      'TikTok': 'https://tiktok.com/@',
+      'WhatsApp': 'https://wa.me/',
+      'Telegram': 'https://t.me/',
+      'Discord': 'https://discord.gg/',
+      'Facebook': 'https://facebook.com/'
+    };
+    
+    setSocialLinks([
+      ...socialLinks, 
+      { 
+        _client_id: Date.now() + Math.random(), 
+        platform, 
+        url: templates[platform] || '' 
+      }
+    ]);
+    addToast(`${platform} node added!`, 'success');
   };
   const topLinksDisplay = useMemo(
     () => (analytics.topLinks.length > 0 ? analytics.topLinks : [{ platform: 'No data yet', clicks: 0 }]),
@@ -1146,8 +1177,35 @@ const Dashboard = () => {
                       className="flex items-center gap-2 px-6 py-3 bg-blue-600/10 text-blue-500 border border-blue-500/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600/20 transition-all italic"
                     >
                       <Plus size={18} />
-                      Add Node
+                      Add Custom Node
                     </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">Quick Selection</label>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { name: 'Instagram', color: 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600' },
+                        { name: 'X', color: 'bg-white' },
+                        { name: 'TikTok', color: 'bg-zinc-900' },
+                        { name: 'YouTube', color: 'bg-red-600' },
+                        { name: 'LinkedIn', color: 'bg-blue-600' },
+                        { name: 'GitHub', color: 'bg-zinc-800' },
+                        { name: 'WhatsApp', color: 'bg-emerald-500' },
+                        { name: 'Discord', color: 'bg-indigo-500' }
+                      ].map(p => (
+                        <button
+                          key={p.name}
+                          onClick={() => quickAddLink(p.name)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl hover:border-blue-500/50 hover:bg-[var(--bg-secondary)] transition-all group shadow-sm"
+                        >
+                          <div className={`w-6 h-6 rounded-lg ${p.color} flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform shadow-md overflow-hidden`}>
+                            {getPlatformVisual(p.name).icon}
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest">{p.name}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <Reorder.Group axis="y" values={socialLinks} onReorder={setSocialLinks} className="space-y-4">
